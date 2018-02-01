@@ -46,7 +46,7 @@ export class CMakeToolsHelper {
 
     activeCMakeConfigName()
     {
-        return this.cmakeTools.exports._backend.then(cmakeToolsWrapper => {
+        return this.cmakeTools.exports._cmakeDriver.then(cmakeToolsWrapper => {
 
             // cmakeTools.exports         : CMakeToolsWrapper
             // cmakeToolsWrapper          : CMakeToolsWrapper
@@ -61,8 +61,8 @@ export class CMakeToolsHelper {
                                       ? codeModel.configurations  // CodeModelConfiguration
                                       : null;
             //const activeGenerator     = cmakeToolsWrapper.activeGenerator;
-            const activeTargetName    = cmakeToolsWrapper.defaultBuildTarget;
-            const activeBuiltTypeName = cmakeToolsWrapper.selectedBuildType;
+            const activeTargetName    = cmakeToolsWrapper.stateManager.defaultBuildTarget;
+            const activeBuiltTypeName = cmakeToolsWrapper.currentBuildType;
             const activeConfig        = (configs != null)
                                       ? configs.find(c => (c.name == activeBuiltTypeName))
                                       : null;
@@ -82,7 +82,7 @@ export class CMakeToolsHelper {
 
     updateCppTools() {
         this.activeCMakeConfigName().then(activeConfigName => {
-            this.cmakeTools.exports._backend.then(cmakeToolsWrapper => {
+            this.cmakeTools.exports._cmakeDriver.then(cmakeToolsWrapper => {
                 // get all the configs
                 const codeModel    = cmakeToolsWrapper.codeModel;
                 const cmakeConfigs = ((typeof codeModel === 'undefined') || (codeModel == null))
