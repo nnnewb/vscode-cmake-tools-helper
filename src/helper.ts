@@ -360,3 +360,26 @@ export function computeCMakeVersion(cmakeInstallDir: string): string {
     }
     return cmakeVersion[1];
 }
+
+export function getGccDefaultIncludeDir(compilerPath: string): Promise<string[]> {
+    let stderrOutput = ''
+    let proc = child_process.exec(`${compilerPath} -xc++ -E -v -`)
+
+    proc.stderr.on('data', (data) => {
+        stderrOutput += data
+    });
+    proc.stdin.end('int main() {return0;}');
+
+    return new Promise<string[]>((resolve, reject) => {
+        proc.on('close', (code, signal) => {
+            if (code == 0 && signal == null) {
+                let all_lines = stderrOutput.split('\n');
+                let search_path_begin_index = all_lines.findIndex((s) => s.startsWith('#include <...>'));
+                let search_path_end_index = all_lines.findIndex((s) => s.startsWith('End of search list.'));
+                resolve(all_lines.slice(search_path_begin_index + 1, search_path_end_index));
+            } else {
+                reject(`GCC stoped. status code ${code}, signal ${signal}.\nstderr: ${stderrOutput}\n`);
+            }
+        });
+    });
+}
